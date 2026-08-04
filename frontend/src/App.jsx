@@ -16,6 +16,7 @@ import AdminDashboard from '@/features/dashboard/admin/AdminDashboard';
 
 import ProblemsListPage from '@/features/problems/ProblemsListPage';
 import ProblemWorkspacePage from '@/features/problems/ProblemWorkspacePage';
+import OnlineCompilerPage from '@/features/compiler/OnlineCompilerPage';
 import ContestsListPage from '@/features/contests/ContestsListPage';
 import LeaderboardPage from '@/features/leaderboard/LeaderboardPage';
 
@@ -40,7 +41,9 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['STUDENT']} />}>
           <Route element={<DashboardLayout />}>
             <Route path="/student" element={<StudentDashboard />} />
-            <Route path="/problems" element={<ProblemsListPage />} />
+            <Route path="/problems" element={<OnlineCompilerPage />} />
+            <Route path="/compiler" element={<OnlineCompilerPage />} />
+            <Route path="/problems/practice" element={<ProblemsListPage />} />
             <Route path="/problems/:slug" element={<ProblemWorkspacePage />} />
             <Route path="/contests" element={<ContestsListPage />} />
             <Route path="/assignments" element={<ComingSoon title="Assignments" description="Deadlines, submissions and feedback in one place." />} />

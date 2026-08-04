@@ -36,4 +36,17 @@ async function create(req, res) {
   res.json(ApiResponse.message('Problem created. Publish it once it\'s reviewed.'));
 }
 
-module.exports = { list, detail, run, submit, submissions, create };
+async function compile(req, res) {
+  const { language, code, stdin, customInput } = req.body;
+  const input = stdin !== undefined ? stdin : customInput;
+  const judgeService = require('../submission/judge/dockerJudgeService');
+  const result = await judgeService.execute(language, code, input || '', 5000, 256);
+  res.json(ApiResponse.ok({
+    verdict: result.verdict === 'PENDING' ? 'ACCEPTED' : result.verdict,
+    output: result.stdout || result.stderr || '',
+    stderr: result.stderr || '',
+    runtimeMs: result.runtimeMs || 0,
+  }));
+}
+
+module.exports = { list, detail, run, submit, submissions, create, compile };

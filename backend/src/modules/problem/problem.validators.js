@@ -20,14 +20,21 @@ const createProblemSchema = z.object({
 });
 
 const runSchema = z.object({
-  language: z.enum(['JAVA', 'PYTHON', 'CPP', 'C', 'JAVASCRIPT']),
-  code: z.string().min(1),
+  language: z.string().min(1),
+  code: z.string(),
   customInput: z.string().optional().nullable(),
 });
 
 const submitSchema = z.object({
-  language: z.enum(['JAVA', 'PYTHON', 'CPP', 'C', 'JAVASCRIPT']),
-  code: z.string().min(1),
+  language: z.string().min(1),
+  code: z.string(),
 });
 
-module.exports = { createProblemSchema, runSchema, submitSchema };
+const compileSchema = z.object({
+  language: z.string().min(1),
+  code: z.string(),
+  stdin: z.string().optional().nullable(),
+  customInput: z.string().optional().nullable(),
+});
+
+module.exports = { createProblemSchema, runSchema, submitSchema, compileSchema };

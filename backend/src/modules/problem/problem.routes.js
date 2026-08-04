@@ -7,6 +7,7 @@ const v = require('./problem.validators');
 const router = express.Router();
 
 // NOTE: SecurityConfig.java requires auth on all of /api/problems/**.
+router.post('/compile', validateBody(v.compileSchema), controller.compile);
 router.get('/', requireAuth, controller.list);
 router.get('/:slug', requireAuth, controller.detail);
 router.post('/:slug/run', requireAuth, validateBody(v.runSchema), controller.run);
