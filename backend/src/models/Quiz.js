@@ -15,8 +15,8 @@ const quizSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     description: { type: String, default: '' },
-    startTime: { type: Date, required: true },
-    endTime: { type: Date, required: true },
+    startTime: { type: Date, required: false, default: null },
+    endTime: { type: Date, required: false, default: null },
     durationMinutes: { type: Number, required: true },
     totalMarks: { type: Number, default: 0 },
     createdById: { type: String, required: true },

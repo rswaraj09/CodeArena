@@ -4,7 +4,7 @@ const QuizAttempt = require('../../models/QuizAttempt');
 const { BadRequestException, ResourceNotFoundException } = require('../../common/errors');
 
 async function create(request, creator) {
-  if (!(new Date(request.endTime) > new Date(request.startTime))) {
+  if (request.startTime && request.endTime && !(new Date(request.endTime) > new Date(request.startTime))) {
     throw new BadRequestException('Test end time must be after the start time.');
   }
 
@@ -21,12 +21,16 @@ async function create(request, creator) {
     };
   });
 
+  const now = new Date();
+  const startTime = request.startTime ? new Date(request.startTime) : now;
+  const endTime = request.endTime ? new Date(request.endTime) : new Date(now.getTime() + 10 * 365 * 24 * 60 * 60 * 1000); // 10 years default
+
   return Quiz.create({
     title: request.title,
-    description: request.description,
-    startTime: request.startTime,
-    endTime: request.endTime,
-    durationMinutes: request.durationMinutes,
+    description: request.description || '',
+    startTime,
+    endTime,
+    durationMinutes: request.durationMinutes || 30,
     totalMarks,
     createdById: creator.id,
     questions,
@@ -132,6 +136,7 @@ async function submit(quizId, request, student) {
       selectedOptionIndex: selectedOpt,
       correctOptionIndex: q.correctOptionIndex,
       correct: isCorrect,
+      isCorrect: isCorrect,
       pointsEarned,
       maxPoints: q.points,
     };
@@ -178,6 +183,7 @@ async function getResult(quizId, student) {
       selectedOptionIndex: selectedOpt,
       correctOptionIndex: q.correctOptionIndex,
       correct: isCorrect,
+      isCorrect: isCorrect,
       pointsEarned: isCorrect ? q.points : 0,
       maxPoints: q.points,
     };

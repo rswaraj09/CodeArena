@@ -43,8 +43,6 @@ const TrainerQuizzesPage = () => {
   // Form State
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
   const [durationMinutes, setDurationMinutes] = useState(30);
   const [questions, setQuestions] = useState([
     {
@@ -104,14 +102,12 @@ const TrainerQuizzesPage = () => {
     const payload = {
       title,
       description,
-      startTime: new Date(startTime).toISOString(),
-      endTime: new Date(endTime).toISOString(),
-      durationMinutes: Number(durationMinutes),
+      durationMinutes: Number(durationMinutes || 30),
       questions: questions.map((q) => ({
         questionText: q.questionText,
         options: q.options,
         correctOptionIndex: Number(q.correctOptionIndex),
-        points: Number(q.points),
+        points: Number(q.points || 5),
       })),
     };
 
@@ -129,8 +125,6 @@ const TrainerQuizzesPage = () => {
   const resetForm = () => {
     setTitle('');
     setDescription('');
-    setStartTime('');
-    setEndTime('');
     setDurationMinutes(30);
     setQuestions([
       {
@@ -150,7 +144,7 @@ const TrainerQuizzesPage = () => {
             Quizzes & Tests
           </Typography>
           <Typography sx={{ color: 'text.secondary' }}>
-            Create tests with custom questions, answer keys, and set start & end timestamps.
+            Create auto-graded tests with MCQ answer keys and duration settings.
           </Typography>
         </Box>
         <Button
@@ -175,7 +169,7 @@ const TrainerQuizzesPage = () => {
       ) : quizzes.length > 0 ? (
         <Grid container spacing={2.5}>
           {quizzes.map((q) => {
-            const style = STATUS_STYLE[q.status] || STATUS_STYLE.UPCOMING;
+            const style = STATUS_STYLE[q.status] || STATUS_STYLE.LIVE;
             return (
               <Grid item xs={12} md={6} key={q.id}>
                 <Paper elevation={0} sx={{ p: 3, borderRadius: 3 }}>
@@ -195,25 +189,16 @@ const TrainerQuizzesPage = () => {
                     />
                   </Stack>
 
-                  <Stack direction="row" spacing={2} sx={{ my: 2, color: 'text.secondary' }}>
+                  <Stack direction="row" spacing={2} sx={{ mt: 2, color: 'text.secondary' }}>
                     <Stack direction="row" spacing={0.5} alignItems="center">
                       <QuizRoundedIcon sx={{ fontSize: 16 }} />
                       <Typography variant="caption">{q.questionCount} Questions ({q.totalMarks} Marks)</Typography>
                     </Stack>
                     <Stack direction="row" spacing={0.5} alignItems="center">
                       <ScheduleRoundedIcon sx={{ fontSize: 16 }} />
-                      <Typography variant="caption">{q.durationMinutes} Mins</Typography>
+                      <Typography variant="caption">{q.durationMinutes} Mins Duration</Typography>
                     </Stack>
                   </Stack>
-
-                  <Divider sx={{ my: 1.5 }} />
-
-                  <Typography variant="caption" display="block" color="text.secondary">
-                    Start: {q.startTime ? new Date(q.startTime).toLocaleString() : 'N/A'}
-                  </Typography>
-                  <Typography variant="caption" display="block" color="text.secondary">
-                    End: {q.endTime ? new Date(q.endTime).toLocaleString() : 'N/A'}
-                  </Typography>
                 </Paper>
               </Grid>
             );
@@ -233,44 +218,15 @@ const TrainerQuizzesPage = () => {
       {/* Create Test Modal */}
       <Dialog open={openModal} onClose={() => setOpenModal(false)} maxWidth="md" fullWidth>
         <form onSubmit={handleCreateQuiz}>
-          <DialogTitle>Create New Test / Quiz</DialogTitle>
+          <DialogTitle>Create New Auto-Graded Test</DialogTitle>
           <DialogContent dividers>
             <Stack spacing={2.5}>
-              <TextField
-                label="Test Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                fullWidth
-              />
-              <TextField
-                label="Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                multiline
-                rows={2}
-                fullWidth
-              />
-
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={8}>
                   <TextField
-                    label="Start Time"
-                    type="datetime-local"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
-                    required
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <TextField
-                    label="End Time"
-                    type="datetime-local"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
+                    label="Test Title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
                     required
                     fullWidth
                   />
@@ -287,14 +243,23 @@ const TrainerQuizzesPage = () => {
                 </Grid>
               </Grid>
 
+              <TextField
+                label="Description / Instructions"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                multiline
+                rows={2}
+                fullWidth
+              />
+
               <Divider sx={{ my: 1 }} />
-              <Typography variant="h6" sx={{ fontSize: '1rem' }}>Questions & Options</Typography>
+              <Typography variant="h6" sx={{ fontSize: '1rem' }}>Questions & Correct MCQ Answers</Typography>
 
               {questions.map((q, qIndex) => (
                 <Paper key={qIndex} variant="outlined" sx={{ p: 2.5, borderRadius: 2 }}>
                   <Stack spacing={2}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
-                      <Typography variant="subtitle2" color="primary">
+                      <Typography variant="subtitle2" color="primary" fontWeight={700}>
                         Question {qIndex + 1}
                       </Typography>
                       {questions.length > 1 && (
@@ -317,7 +282,7 @@ const TrainerQuizzesPage = () => {
                       </Grid>
                       <Grid item xs={12} sm={3}>
                         <TextField
-                          label="Points"
+                          label="Points / Marks"
                           type="number"
                           value={q.points}
                           onChange={(e) => handleQuestionChange(qIndex, 'points', e.target.value)}
@@ -329,34 +294,56 @@ const TrainerQuizzesPage = () => {
                     </Grid>
 
                     <FormControl component="fieldset">
-                      <FormLabel component="legend" sx={{ fontSize: '0.85rem', mb: 1 }}>
-                        Options (Select Radio for Correct Option):
+                      <FormLabel component="legend" sx={{ fontSize: '0.85rem', mb: 1, color: 'text.primary', fontWeight: 600 }}>
+                        Options — Select the radio button for the Correct Answer:
                       </FormLabel>
                       <RadioGroup
-                        value={q.correctOptionIndex}
-                        onChange={(e) => handleQuestionChange(qIndex, 'correctOptionIndex', e.target.value)}
+                        value={Number(q.correctOptionIndex)}
+                        onChange={(e) => handleQuestionChange(qIndex, 'correctOptionIndex', Number(e.target.value))}
                       >
                         <Grid container spacing={1.5}>
-                          {q.options.map((opt, oIndex) => (
-                            <Grid item xs={12} sm={6} key={oIndex}>
-                              <Stack direction="row" alignItems="center" spacing={1}>
-                                <FormControlLabel
-                                  value={oIndex}
-                                  control={<Radio size="small" />}
-                                  label=""
-                                  sx={{ mr: 0 }}
-                                />
-                                <TextField
-                                  placeholder={`Option ${String.fromCharCode(65 + oIndex)}`}
-                                  value={opt}
-                                  onChange={(e) => handleOptionChange(qIndex, oIndex, e.target.value)}
-                                  required
-                                  fullWidth
-                                  size="small"
-                                />
-                              </Stack>
-                            </Grid>
-                          ))}
+                          {q.options.map((opt, oIndex) => {
+                            const isCorrect = Number(q.correctOptionIndex) === oIndex;
+                            return (
+                              <Grid item xs={12} sm={6} key={oIndex}>
+                                <Paper
+                                  variant="outlined"
+                                  sx={{
+                                    p: 1,
+                                    px: 1.5,
+                                    borderRadius: 2,
+                                    borderColor: isCorrect ? 'success.main' : 'divider',
+                                    bgcolor: isCorrect ? 'rgba(52,211,153,0.08)' : 'transparent',
+                                  }}
+                                >
+                                  <Stack direction="row" alignItems="center" spacing={1}>
+                                    <FormControlLabel
+                                      value={oIndex}
+                                      control={<Radio size="small" color="success" />}
+                                      label=""
+                                      sx={{ mr: 0 }}
+                                    />
+                                    <TextField
+                                      placeholder={`Option ${String.fromCharCode(65 + oIndex)}`}
+                                      value={opt}
+                                      onChange={(e) => handleOptionChange(qIndex, oIndex, e.target.value)}
+                                      required
+                                      fullWidth
+                                      size="small"
+                                    />
+                                    {isCorrect && (
+                                      <Chip
+                                        size="small"
+                                        label="Correct Answer"
+                                        color="success"
+                                        sx={{ height: 24, fontSize: '0.7rem' }}
+                                      />
+                                    )}
+                                  </Stack>
+                                </Paper>
+                              </Grid>
+                            );
+                          })}
                         </Grid>
                       </RadioGroup>
                     </FormControl>

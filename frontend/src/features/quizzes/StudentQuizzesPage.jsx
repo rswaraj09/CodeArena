@@ -81,10 +81,6 @@ const StudentQuizzesPage = () => {
                     </Stack>
                   </Stack>
 
-                  <Typography variant="caption" display="block" color="text.secondary" sx={{ mb: 2 }}>
-                    Window: {q.startTime ? new Date(q.startTime).toLocaleString() : 'N/A'} — {q.endTime ? new Date(q.endTime).toLocaleString() : 'N/A'}
-                  </Typography>
-
                   {q.attempted ? (
                     <Button
                       fullWidth
@@ -93,9 +89,9 @@ const StudentQuizzesPage = () => {
                       startIcon={<CheckCircleRoundedIcon />}
                       onClick={() => navigate(`/quizzes/${q.id}/attempt`)}
                     >
-                      Completed (Score: {q.userScore} / {q.totalMarks})
+                      Completed (Score: {q.score !== null && q.score !== undefined ? q.score : (q.userScore || 0)} / {q.totalMarks})
                     </Button>
-                  ) : statusKey === 'LIVE' ? (
+                  ) : (
                     <Button
                       fullWidth
                       variant="contained"
@@ -104,14 +100,6 @@ const StudentQuizzesPage = () => {
                       onClick={() => navigate(`/quizzes/${q.id}/attempt`)}
                     >
                       Attempt Test Now
-                    </Button>
-                  ) : statusKey === 'UPCOMING' ? (
-                    <Button fullWidth variant="outlined" disabled>
-                      Scheduled — Starts Soon
-                    </Button>
-                  ) : (
-                    <Button fullWidth variant="outlined" disabled>
-                      Test Expired
                     </Button>
                   )}
                 </Paper>

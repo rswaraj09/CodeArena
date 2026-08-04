@@ -54,10 +54,10 @@ const QuizAttemptPage = () => {
           // Fetch existing attempt results
           return quizService.getResult(id).then((rRes) => setResult(rRes.data));
         } else {
-          // Initialize countdown timer (duration or until endTime, whichever is smaller)
+          // Initialize countdown timer
           const nowMs = Date.now();
-          const endMs = new Date(quizData.endTime).getTime();
-          const durationMs = quizData.durationMinutes * 60 * 1000;
+          const durationMs = (quizData.durationMinutes || 30) * 60 * 1000;
+          const endMs = quizData.endTime ? new Date(quizData.endTime).getTime() : nowMs + durationMs;
           const targetMs = Math.min(nowMs + durationMs, endMs);
           const remainingSecs = Math.max(0, Math.floor((targetMs - nowMs) / 1000));
           setTimeLeft(remainingSecs);
@@ -173,34 +173,36 @@ const QuizAttemptPage = () => {
         </Typography>
 
         <Stack spacing={2}>
-          {result.questionResults.map((q, index) => (
-            <Paper key={q.questionId || index} elevation={0} sx={{ p: 3, borderRadius: 3 }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.5 }}>
-                <Typography variant="subtitle1" fontWeight={600}>
-                  Q{index + 1}. {q.questionText}
-                </Typography>
-                <Chip
-                  size="small"
-                  icon={q.isCorrect ? <CheckCircleRoundedIcon /> : <CancelRoundedIcon />}
-                  label={q.isCorrect ? `+${q.pointsEarned} pts` : `0 / ${q.maxPoints} pts`}
-                  color={q.isCorrect ? 'success' : 'error'}
-                />
-              </Stack>
+          {result.questionResults.map((q, index) => {
+            const isAnswerCorrect = Boolean(q.correct || q.isCorrect);
+            return (
+              <Paper key={q.questionId || index} elevation={0} sx={{ p: 3, borderRadius: 3 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.5 }}>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    Q{index + 1}. {q.questionText}
+                  </Typography>
+                  <Chip
+                    size="small"
+                    icon={isAnswerCorrect ? <CheckCircleRoundedIcon /> : <CancelRoundedIcon />}
+                    label={isAnswerCorrect ? `+${q.pointsEarned} pts` : `0 / ${q.maxPoints} pts`}
+                    color={isAnswerCorrect ? 'success' : 'error'}
+                  />
+                </Stack>
 
-              <Stack spacing={1} sx={{ mt: 2 }}>
-                {q.options.map((opt, oIdx) => {
-                  const isSelected = q.selectedOptionIndex === oIdx;
-                  const isCorrectOpt = q.correctOptionIndex === oIdx;
+                <Stack spacing={1} sx={{ mt: 2 }}>
+                  {q.options.map((opt, oIdx) => {
+                    const isSelected = q.selectedOptionIndex === oIdx;
+                    const isCorrectOpt = q.correctOptionIndex === oIdx;
 
-                  let borderColor = 'divider';
-                  let bgcolor = 'transparent';
-                  if (isCorrectOpt) {
-                    borderColor = 'success.main';
-                    bgcolor = 'rgba(52,211,153,0.08)';
-                  } else if (isSelected && !q.isCorrect) {
-                    borderColor = 'error.main';
-                    bgcolor = 'rgba(251,100,103,0.08)';
-                  }
+                    let borderColor = 'divider';
+                    let bgcolor = 'transparent';
+                    if (isCorrectOpt) {
+                      borderColor = 'success.main';
+                      bgcolor = 'rgba(52,211,153,0.08)';
+                    } else if (isSelected && !isAnswerCorrect) {
+                      borderColor = 'error.main';
+                      bgcolor = 'rgba(251,100,103,0.08)';
+                    }
 
                   return (
                     <Box

@@ -10,9 +10,9 @@ const questionSchema = z.object({
 const createQuizSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional().default(''),
-  startTime: z.coerce.date(),
-  endTime: z.coerce.date(),
-  durationMinutes: z.number().int().positive(),
+  startTime: z.coerce.date().optional().nullable(),
+  endTime: z.coerce.date().optional().nullable(),
+  durationMinutes: z.number().int().positive().optional().default(30),
   questions: z.array(questionSchema).min(1),
 });
 
