@@ -2,12 +2,15 @@ const mongoose = require('mongoose');
 const env = require('./env');
 const dns = require('dns');
 
-// Set public DNS servers to resolve MongoDB Atlas SRV records on Windows/local networks
-try {
-  dns.setServers(['8.8.8.8', '1.1.1.1']);
-} catch (err) {
-  // Fallback gracefully if setServers is unavailable
+// Set public DNS servers to resolve MongoDB Atlas SRV records on Windows local networks only
+if (process.platform === 'win32' && process.env.NODE_ENV !== 'production') {
+  try {
+    dns.setServers(['8.8.8.8', '1.1.1.1']);
+  } catch (err) {
+    // Fallback gracefully if setServers is unavailable
+  }
 }
+
 
 let connectionPromise = null;
 

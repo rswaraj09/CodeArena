@@ -22,6 +22,16 @@ const { connectDB } = require('../src/config/db');
  * See README.md → "Deploying to Vercel" for the recommended split.
  */
 module.exports = async (req, res) => {
-  await connectDB();
+  try {
+    await connectDB();
+  } catch (error) {
+    console.error('Database connection error in Vercel function:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Database connection error: ' + error.message,
+      error: 'MONGODB_CONNECTION_FAILED'
+    });
+  }
   return app(req, res);
 };
+
