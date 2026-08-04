@@ -3,8 +3,19 @@ import axios from 'axios';
 // Central Axios instance. Every feature service imports this instead of
 // calling axios directly, so auth headers, base URL and error handling
 // stay in one place.
+const rawBaseURL = import.meta.env.VITE_API_BASE_URL || '/api';
+
+const sanitizeBaseURL = (url) => {
+  if (!url) return '/api';
+  let cleaned = url.replace(/\/+$/, '');
+  if (!cleaned.endsWith('/api')) {
+    cleaned += '/api';
+  }
+  return cleaned;
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: sanitizeBaseURL(rawBaseURL),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -52,7 +63,7 @@ api.interceptors.response.use(
 
       try {
         const { data } = await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL || '/api'}/auth/refresh`,
+          `${sanitizeBaseURL(rawBaseURL)}/auth/refresh`,
           { refreshToken }
         );
         const newAccessToken = data.data.accessToken;
