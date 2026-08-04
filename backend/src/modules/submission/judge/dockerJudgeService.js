@@ -20,28 +20,65 @@ const CONTAINER_MEMORY_OVERHEAD_MB = 64; // headroom over the judged program's o
  * serverless function — see README.md for how to host this piece
  * separately (a VM / Render / Railway / Fly.io) and point the API at it.
  */
-const PISTON_LANGUAGES = {
-  javascript: 'javascript',
-  js: 'javascript',
-  python: 'python',
-  python3: 'python',
-  cpp: 'c++',
-  c: 'c',
-  java: 'java',
+const vm = require('vm');
+
+const JUDGE0_LANG_IDS = {
+  c: 1,
+  cpp: 2,
+  java: 4,
+  python: 25,
+  python3: 25,
+  go: 8,
+  rust: 1,
 };
 
-async function executePiston(language, code, stdin) {
-  const pistonLang = PISTON_LANGUAGES[(language || '').toLowerCase()] || (language || '').toLowerCase() || 'javascript';
+async function executeOnlineCompiler(language, code, stdin) {
+  const langKey = (language || '').toLowerCase().trim();
   const startTime = Date.now();
 
+  if (langKey === 'javascript' || langKey === 'js') {
+    try {
+      let stdout = '';
+      let stderr = '';
+      const customConsole = {
+        log: (...args) => { stdout += args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n'; },
+        error: (...args) => { stderr += args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n'; },
+        warn: (...args) => { stdout += args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n'; },
+      };
+
+      const context = vm.createContext({
+        console: customConsole,
+        stdin: stdin || '',
+        String, Number, Array, Object, Math, JSON, Date, parseInt, parseFloat, isNaN,
+      });
+
+      vm.runInContext(code || '', context, { timeout: 3000 });
+
+      return {
+        verdict: 'PENDING',
+        stdout,
+        stderr,
+        runtimeMs: Date.now() - startTime,
+      };
+    } catch (err) {
+      return {
+        verdict: 'RUNTIME_ERROR',
+        stdout: '',
+        stderr: err.message || 'JavaScript Runtime Error.',
+        runtimeMs: Date.now() - startTime,
+      };
+    }
+  }
+
+  const language_id = JUDGE0_LANG_IDS[langKey] || 1;
+
   try {
-    const response = await fetch('https://emkc.org/api/v2/piston/execute', {
+    const response = await fetch('https://extra-ce.judge0.com/submissions?wait=true', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        language: pistonLang,
-        version: '*',
-        files: [{ content: code || '' }],
+        language_id,
+        source_code: code || '',
         stdin: stdin || '',
       }),
     });
@@ -51,46 +88,54 @@ async function executePiston(language, code, stdin) {
       return {
         verdict: 'RUNTIME_ERROR',
         stdout: '',
-        stderr: `Execution failed (${response.status}): ${errText}`,
+        stderr: `Compiler execution failed (${response.status}): ${errText}`,
         runtimeMs: Date.now() - startTime,
       };
     }
 
     const data = await response.json();
-    const runtimeMs = Date.now() - startTime;
+    const runtimeMs = Math.round(parseFloat(data.time || '0') * 1000) || (Date.now() - startTime);
 
-    if (data.compile && data.compile.code !== 0 && data.compile.code !== null) {
+    if (data.compile_output) {
       return {
         verdict: 'COMPILATION_ERROR',
-        stdout: data.compile.stdout || '',
-        stderr: data.compile.stderr || data.compile.output || 'Compilation Error.',
+        stdout: '',
+        stderr: data.compile_output,
         runtimeMs,
       };
     }
 
-    const runResult = data.run || {};
-    if (runResult.signal === 'SIGKILL' || runResult.code === 124) {
+    if (data.status && data.status.id === 6) {
+      return {
+        verdict: 'COMPILATION_ERROR',
+        stdout: '',
+        stderr: data.stderr || data.message || 'Compilation Error.',
+        runtimeMs,
+      };
+    }
+
+    if (data.status && data.status.id === 5) {
       return {
         verdict: 'TIME_LIMIT_EXCEEDED',
-        stdout: runResult.stdout || '',
+        stdout: data.stdout || '',
         stderr: 'Time Limit Exceeded.',
         runtimeMs,
       };
     }
 
-    if (runResult.code !== 0 && runResult.code !== null) {
+    if (data.status && data.status.id !== 3) {
       return {
         verdict: 'RUNTIME_ERROR',
-        stdout: runResult.stdout || '',
-        stderr: runResult.stderr || runResult.output || 'Runtime Error.',
+        stdout: data.stdout || '',
+        stderr: data.stderr || data.message || 'Runtime Error.',
         runtimeMs,
       };
     }
 
     return {
       verdict: 'PENDING',
-      stdout: runResult.stdout || '',
-      stderr: runResult.stderr || '',
+      stdout: data.stdout || '',
+      stderr: data.stderr || '',
       runtimeMs,
     };
   } catch (err) {
@@ -105,7 +150,7 @@ async function executePiston(language, code, stdin) {
 
 async function execute(language, code, stdin, timeLimitMs, memoryLimitMb) {
   if (env.judge.disabled) {
-    return executePiston(language, code, stdin);
+    return executeOnlineCompiler(language, code, stdin);
   }
 
   const runtime = languageRuntime.of(language);
