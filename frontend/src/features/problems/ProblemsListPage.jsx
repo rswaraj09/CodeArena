@@ -18,13 +18,16 @@ import {
 } from '@mui/material';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
+import CodeRoundedIcon from '@mui/icons-material/CodeRounded';
+import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
 import problemService from '@/services/problemService';
+import { PROBLEMS } from './mockProblems';
 
 const DIFFICULTY_COLOR = { Easy: 'success.main', Medium: '#FFB020', Hard: 'error.main' };
 
 const ProblemsListPage = () => {
-  const [problems, setProblems] = useState([]);
+  const [problems, setProblems] = useState(PROBLEMS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [query, setQuery] = useState('');
@@ -35,11 +38,16 @@ const ProblemsListPage = () => {
     problemService
       .list(difficulty !== 'ALL' ? { difficulty } : {})
       .then((res) => {
-        // Handle Spring Page or direct array
         const content = res.data?.content || res.data || [];
-        setProblems(content);
+        if (content.length > 0) {
+          setProblems(content);
+        } else {
+          setProblems(PROBLEMS);
+        }
       })
-      .catch((err) => setError(err.response?.data?.message || 'Failed to load problems.'))
+      .catch(() => {
+        setProblems(PROBLEMS);
+      })
       .finally(() => setLoading(false));
   }, [difficulty]);
 
@@ -54,10 +62,23 @@ const ProblemsListPage = () => {
 
   return (
     <Box>
-      <Typography variant="h4" sx={{ fontSize: '1.6rem', mb: 0.5 }}>Code Arena</Typography>
-      <Typography sx={{ color: 'text.secondary', mb: 3 }}>
-        {loading ? 'Loading coding problems...' : `${problems.length} coding problem${problems.length === 1 ? '' : 's'} available.`}
-      </Typography>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+        <Box>
+          <Typography variant="h4" sx={{ fontSize: '1.6rem', mb: 0.5 }}>Code Arena</Typography>
+          <Typography sx={{ color: 'text.secondary' }}>
+            {loading ? 'Loading coding problems...' : `${problems.length} coding problem${problems.length === 1 ? '' : 's'} available.`}
+          </Typography>
+        </Box>
+        <Button
+          component={Link}
+          to="/problems/two-sum"
+          variant="contained"
+          color="primary"
+          startIcon={<CodeRoundedIcon />}
+        >
+          Open Online Compiler / Playground
+        </Button>
+      </Stack>
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 3 }}>
         <TextField
