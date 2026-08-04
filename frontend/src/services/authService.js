@@ -5,7 +5,6 @@ const authService = {
 
   register: (payload) => api.post('/auth/register', payload).then((r) => r.data),
 
-  verifyOtp: (payload) => api.post('/auth/verify-otp', payload).then((r) => r.data),
 
   forgotPassword: (email) => api.post('/auth/forgot-password', { email }).then((r) => r.data),
 

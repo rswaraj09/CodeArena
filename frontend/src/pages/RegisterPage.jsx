@@ -29,7 +29,7 @@ const RegisterPage = () => {
     dispatch(clearAuthError());
     const result = await dispatch(register(form));
     if (register.fulfilled.match(result)) {
-      navigate('/verify-otp', { state: { email: form.email } });
+      navigate('/login', { state: { registered: true, email: form.email } });
     }
   };
 

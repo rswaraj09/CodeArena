@@ -21,10 +21,6 @@ const env = {
     allowedOrigins: (process.env.CORS_ALLOWED_ORIGINS || 'http://localhost:5173').split(','),
   },
 
-  email: {
-    resendApiKey: process.env.RESEND_API_KEY || '',
-    from: process.env.RESEND_FROM_EMAIL || 'CodeArena <onboarding@resend.dev>',
-  },
 
   judge: {
     disabled: bool(process.env.JUDGE_DISABLED, false),

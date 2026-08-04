@@ -55,6 +55,11 @@ const LoginPage = () => {
           Enter the arena and pick up where you left off.
         </Typography>
 
+        {location.state?.registered && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            Account created successfully! Please sign in.
+          </Alert>
+        )}
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
         <Box component="form" onSubmit={handleSubmit}>

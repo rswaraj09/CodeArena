@@ -25,7 +25,7 @@ const loginSchema = z.object({
 
 const verifyOtpSchema = z.object({
   email: z.string().email(),
-  code: z.string().min(1),
+  code: z.string().optional().default(''),
 });
 
 const forgotPasswordSchema = z.object({
@@ -34,7 +34,7 @@ const forgotPasswordSchema = z.object({
 
 const resetPasswordSchema = z.object({
   email: z.string().email(),
-  code: z.string().min(1),
+  code: z.string().optional().default(''),
   newPassword: z.string().min(8).max(72),
 });
 

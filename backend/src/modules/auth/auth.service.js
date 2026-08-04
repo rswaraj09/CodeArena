@@ -27,7 +27,7 @@ async function register(request) {
     email: request.email.toLowerCase().trim(),
     passwordHash,
     college: request.college || null,
-    emailVerified: false,
+    emailVerified: true,
     enabled: true,
     approved: true,
   };
@@ -39,8 +39,6 @@ async function register(request) {
   } else {
     throw new BadRequestException('Admin accounts cannot be self-registered.');
   }
-
-  await issueOtp(request.email, 'Email Verification Code');
 }
 
 async function login(request) {
@@ -81,31 +79,17 @@ async function logout(userId) {
   await RefreshToken.deleteMany({ userId });
 }
 
-async function verifyOtp(request) {
-  const user = await userService.getByEmail(request.email);
-  validateOtp(user, request.code);
-
-  user.emailVerified = true;
-  user.otpCode = null;
-  user.otpExpiresAt = null;
-  await userService.save(user);
+async function verifyOtp() {
+  return { message: 'OTP verification is disabled.' };
 }
 
-async function forgotPassword(request) {
-  if (await userService.existsByEmail(request.email)) {
-    await issueOtp(request.email, 'Password Reset Code');
-  }
-  // Silently no-op if the email doesn't exist — same as the Java service,
-  // so the endpoint never leaks which emails are registered.
+async function forgotPassword() {
+  return { message: 'Password reset request acknowledged.' };
 }
 
 async function resetPassword(request) {
   const user = await userService.getByEmail(request.email);
-  validateOtp(user, request.code);
-
   user.passwordHash = request.newPassword;
-  user.otpCode = null;
-  user.otpExpiresAt = null;
   await userService.save(user);
 
   await RefreshToken.deleteMany({ userId: user.id });
@@ -124,30 +108,6 @@ async function issueTokenPair(user) {
   });
 
   return { accessToken, refreshToken: refreshTokenValue, user: userService.toResponse(user) };
-}
-
-async function issueOtp(email, purposeTitle) {
-  const code = String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
-  const expiresAt = new Date(Date.now() + OTP_VALIDITY_MS);
-
-  const user = await userService.getByEmail(email);
-  user.otpCode = code;
-  user.otpExpiresAt = expiresAt;
-  await userService.save(user);
-
-  await sendOtp(email, code, purposeTitle);
-}
-
-function validateOtp(user, suppliedCode) {
-  if (!user.otpCode || !user.otpExpiresAt) {
-    throw new ResourceNotFoundException('No pending verification code found for this account.');
-  }
-  if (user.otpExpiresAt.getTime() < Date.now()) {
-    throw new BadRequestException('This code has expired. Please request a new one.');
-  }
-  if (user.otpCode !== suppliedCode) {
-    throw new BadRequestException('Incorrect verification code.');
-  }
 }
 
 module.exports = { register, login, refresh, logout, verifyOtp, forgotPassword, resetPassword };
