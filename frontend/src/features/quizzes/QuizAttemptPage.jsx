@@ -236,7 +236,8 @@ const QuizAttemptPage = () => {
                 })}
               </Stack>
             </Paper>
-          ))}
+          );
+        })}
         </Stack>
       </Box>
     );
