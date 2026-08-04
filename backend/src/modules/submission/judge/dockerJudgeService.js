@@ -20,14 +20,92 @@ const CONTAINER_MEMORY_OVERHEAD_MB = 64; // headroom over the judged program's o
  * serverless function — see README.md for how to host this piece
  * separately (a VM / Render / Railway / Fly.io) and point the API at it.
  */
-async function execute(language, code, stdin, timeLimitMs, memoryLimitMb) {
-  if (env.judge.disabled) {
+const PISTON_LANGUAGES = {
+  javascript: 'javascript',
+  js: 'javascript',
+  python: 'python',
+  python3: 'python',
+  cpp: 'c++',
+  c: 'c',
+  java: 'java',
+};
+
+async function executePiston(language, code, stdin) {
+  const pistonLang = PISTON_LANGUAGES[(language || '').toLowerCase()] || (language || '').toLowerCase() || 'javascript';
+  const startTime = Date.now();
+
+  try {
+    const response = await fetch('https://emkc.org/api/v2/piston/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        language: pistonLang,
+        version: '*',
+        files: [{ content: code || '' }],
+        stdin: stdin || '',
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      return {
+        verdict: 'RUNTIME_ERROR',
+        stdout: '',
+        stderr: `Execution failed (${response.status}): ${errText}`,
+        runtimeMs: Date.now() - startTime,
+      };
+    }
+
+    const data = await response.json();
+    const runtimeMs = Date.now() - startTime;
+
+    if (data.compile && data.compile.code !== 0 && data.compile.code !== null) {
+      return {
+        verdict: 'COMPILATION_ERROR',
+        stdout: data.compile.stdout || '',
+        stderr: data.compile.stderr || data.compile.output || 'Compilation Error.',
+        runtimeMs,
+      };
+    }
+
+    const runResult = data.run || {};
+    if (runResult.signal === 'SIGKILL' || runResult.code === 124) {
+      return {
+        verdict: 'TIME_LIMIT_EXCEEDED',
+        stdout: runResult.stdout || '',
+        stderr: 'Time Limit Exceeded.',
+        runtimeMs,
+      };
+    }
+
+    if (runResult.code !== 0 && runResult.code !== null) {
+      return {
+        verdict: 'RUNTIME_ERROR',
+        stdout: runResult.stdout || '',
+        stderr: runResult.stderr || runResult.output || 'Runtime Error.',
+        runtimeMs,
+      };
+    }
+
+    return {
+      verdict: 'PENDING',
+      stdout: runResult.stdout || '',
+      stderr: runResult.stderr || '',
+      runtimeMs,
+    };
+  } catch (err) {
     return {
       verdict: 'RUNTIME_ERROR',
       stdout: '',
-      stderr: 'The code judge is disabled on this deployment (JUDGE_DISABLED=true). Docker-based execution requires a host with the Docker daemon — this will not run on Vercel serverless. See README.md.',
-      runtimeMs: 0,
+      stderr: `Online compiler error: ${err.message}`,
+      runtimeMs: Date.now() - startTime,
     };
+  }
+}
+
+async function execute(language, code, stdin, timeLimitMs, memoryLimitMb) {
+  if (env.judge.disabled) {
+    return executePiston(language, code, stdin);
   }
 
   const runtime = languageRuntime.of(language);

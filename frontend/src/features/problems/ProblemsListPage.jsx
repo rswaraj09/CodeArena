@@ -54,14 +54,14 @@ const ProblemsListPage = () => {
 
   return (
     <Box>
-      <Typography variant="h4" sx={{ fontSize: '1.6rem', mb: 0.5 }}>Problems</Typography>
+      <Typography variant="h4" sx={{ fontSize: '1.6rem', mb: 0.5 }}>Code Arena</Typography>
       <Typography sx={{ color: 'text.secondary', mb: 3 }}>
-        {loading ? 'Loading problem repository...' : `${problems.length} problem${problems.length === 1 ? '' : 's'} available.`}
+        {loading ? 'Loading coding problems...' : `${problems.length} coding problem${problems.length === 1 ? '' : 's'} available.`}
       </Typography>
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 3 }}>
         <TextField
-          placeholder="Search problems…"
+          placeholder="Search coding problems…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           fullWidth

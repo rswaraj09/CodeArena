@@ -14,7 +14,7 @@ import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 export const NAV_BY_ROLE = {
   STUDENT: [
     { label: 'Dashboard', to: '/student', icon: DashboardRoundedIcon },
-    { label: 'Problems', to: '/problems', icon: CodeRoundedIcon },
+    { label: 'Code', to: '/problems', icon: CodeRoundedIcon },
     { label: 'Contests', to: '/contests', icon: EmojiEventsRoundedIcon },
     { label: 'Assignments', to: '/assignments', icon: AssignmentRoundedIcon },
     { label: 'Quizzes', to: '/quizzes', icon: QuizRoundedIcon },
@@ -27,7 +27,7 @@ export const NAV_BY_ROLE = {
     { label: 'Workshops', to: '/trainer/workshops', icon: SchoolRoundedIcon },
     { label: 'Contests', to: '/trainer/contests', icon: EmojiEventsRoundedIcon },
     { label: 'Assignments', to: '/trainer/assignments', icon: AssignmentRoundedIcon },
-    { label: 'Question Bank', to: '/trainer/questions', icon: CodeRoundedIcon },
+    { label: 'Code Bank', to: '/trainer/questions', icon: CodeRoundedIcon },
     { label: 'Students', to: '/trainer/students', icon: GroupsRoundedIcon },
     { label: 'Analytics', to: '/trainer/analytics', icon: BarChartRoundedIcon },
   ],
@@ -36,7 +36,7 @@ export const NAV_BY_ROLE = {
     { label: 'Users', to: '/admin/users', icon: GroupsRoundedIcon },
     { label: 'Trainers', to: '/admin/trainers', icon: AdminPanelSettingsRoundedIcon },
     { label: 'Contests', to: '/admin/contests', icon: EmojiEventsRoundedIcon },
-    { label: 'Questions', to: '/admin/questions', icon: CodeRoundedIcon },
+    { label: 'Code Bank', to: '/admin/questions', icon: CodeRoundedIcon },
     { label: 'Analytics', to: '/admin/analytics', icon: BarChartRoundedIcon },
     { label: 'Settings', to: '/admin/settings', icon: SettingsRoundedIcon },
   ],

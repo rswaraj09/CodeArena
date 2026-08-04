@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import {
@@ -30,12 +30,14 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { setLanguage, toggleTheme, setFontSize, toggleSplitScreen } from '@/features/editor/editorSlice';
 import { defineMonacoThemes, LANGUAGE_BOILERPLATE, MONACO_LANGUAGE_ID } from './monacoConfig';
 import { getProblemBySlug } from './mockProblems';
+import problemService from '@/services/problemService';
 
 const DIFFICULTY_COLOR = { Easy: 'success.main', Medium: '#FFB020', Hard: 'error.main' };
 
 const ProblemWorkspacePage = () => {
   const { slug } = useParams();
-  const problem = getProblemBySlug(slug);
+  const fallbackProblem = getProblemBySlug(slug);
+  const [problem, setProblem] = useState(fallbackProblem);
   const dispatch = useAppDispatch();
   const { language, monacoTheme, fontSize, splitScreen } = useAppSelector((s) => s.editor);
 
@@ -43,12 +45,19 @@ const ProblemWorkspacePage = () => {
   const [leftTab, setLeftTab] = useState('description');
   const [consoleTab, setConsoleTab] = useState('input');
   const [customInput, setCustomInput] = useState('');
-  const [output, setOutput] = useState(null); // { verdict, stdout, runtimeMs, memoryKb }
+  const [output, setOutput] = useState(null); // { verdict, stdout, runtimeMs }
   const [isRunning, setIsRunning] = useState(false);
 
-  if (!problem) {
-    return <Typography>Problem not found.</Typography>;
-  }
+  useEffect(() => {
+    problemService
+      .getBySlug(slug)
+      .then((res) => {
+        if (res.data) setProblem(res.data);
+      })
+      .catch(() => {
+        // Fallback to mock problem if offline / backend not loaded
+      });
+  }, [slug]);
 
   const handleLanguageChange = (e) => {
     const lang = e.target.value;
@@ -56,20 +65,37 @@ const ProblemWorkspacePage = () => {
     setCode(LANGUAGE_BOILERPLATE[lang]);
   };
 
-  // Placeholder client-side simulation — wire this to
-  // problemService.run()/submit() once the judge API is live.
-  const runCode = (isSubmit) => {
+  const runCode = async (isSubmit) => {
     setIsRunning(true);
     setConsoleTab('output');
-    setTimeout(() => {
+
+    try {
+      if (!isSubmit) {
+        const res = await problemService.run(slug, { language, code, customInput });
+        const data = res.data || res;
+        setOutput({
+          verdict: data.verdict || 'ACCEPTED',
+          stdout: data.output || data.stderr || 'Code executed successfully.',
+          runtimeMs: data.runtimeMs || 0,
+        });
+      } else {
+        const res = await problemService.submit(slug, { language, code });
+        const data = res.data || res;
+        setOutput({
+          verdict: data.verdict || 'ACCEPTED',
+          stdout: data.judgeOutput || `All test cases checked (${data.testCasesPassed || 0}/${data.testCasesTotal || 0} passed).`,
+          runtimeMs: data.runtimeMs || 0,
+        });
+      }
+    } catch (err) {
       setOutput({
-        verdict: isSubmit ? 'ACCEPTED' : 'PENDING',
-        stdout: isSubmit ? 'All visible + hidden test cases passed.' : 'Program executed. Compare output below.',
-        runtimeMs: 84,
-        memoryKb: 14200,
+        verdict: 'RUNTIME_ERROR',
+        stdout: err.response?.data?.message || err.message || 'Failed to execute code.',
+        runtimeMs: 0,
       });
+    } finally {
       setIsRunning(false);
-    }, 900);
+    }
   };
 
   return (
