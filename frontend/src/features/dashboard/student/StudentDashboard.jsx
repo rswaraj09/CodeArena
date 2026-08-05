@@ -3,7 +3,6 @@ import { Box, Grid, Paper, Typography, Stack, Chip, LinearProgress, Skeleton } f
 import { Line } from 'react-chartjs-2';
 import LocalFireDepartmentRoundedIcon from '@mui/icons-material/LocalFireDepartmentRounded';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
-import EmojiEventsRoundedIcon from '@mui/icons-material/EmojiEventsRounded';
 import AssignmentLateRoundedIcon from '@mui/icons-material/AssignmentLateRounded';
 import StatCard from '@/components/common/StatCard';
 import VerdictChip from '@/components/common/VerdictChip';
@@ -52,8 +51,8 @@ const StudentDashboard = () => {
         <Skeleton variant="text" width={260} height={40} sx={{ mb: 0.5 }} />
         <Skeleton variant="text" width={360} sx={{ mb: 4 }} />
         <Grid container spacing={2.5} sx={{ mb: 3 }}>
-          {[0, 1, 2, 3].map((i) => (
-            <Grid item xs={6} md={3} key={i}>
+          {[0, 1, 2].map((i) => (
+            <Grid item xs={12} sm={4} md={4} key={i}>
               <SkeletonCard />
             </Grid>
           ))}
@@ -104,16 +103,13 @@ const StudentDashboard = () => {
       <Typography sx={{ color: 'text.secondary', mb: 4 }}>Here's where you stand today.</Typography>
 
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid item xs={6} md={3}>
-          <StatCard label="Rank" value={data.rankLabel} sublabel={data.rankPercentile} icon={EmojiEventsRoundedIcon} />
-        </Grid>
-        <Grid item xs={6} md={3}>
+        <Grid item xs={12} sm={4} md={4}>
           <StatCard label="Solved" value={data.solvedCount} sublabel={`of ${data.totalProblemsCount} problems`} icon={CheckCircleRoundedIcon} accent="success.main" />
         </Grid>
-        <Grid item xs={6} md={3}>
+        <Grid item xs={12} sm={4} md={4}>
           <StatCard label="Streak" value={`${data.streakDays} days`} sublabel={`Personal best: ${data.personalBestStreak}`} icon={LocalFireDepartmentRoundedIcon} accent="#FB6467" />
         </Grid>
-        <Grid item xs={6} md={3}>
+        <Grid item xs={12} sm={4} md={4}>
           <StatCard label="Upcoming" value={data.pendingCount} sublabel="Quizzes & tests" icon={AssignmentLateRoundedIcon} accent="secondary.main" />
         </Grid>
       </Grid>

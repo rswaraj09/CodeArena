@@ -17,7 +17,6 @@ export const NAV_BY_ROLE = {
     { label: 'Code', to: '/problems', icon: CodeRoundedIcon },
     { label: 'Assignments', to: '/assignments', icon: AssignmentRoundedIcon },
     { label: 'Tests', to: '/quizzes', icon: QuizRoundedIcon },
-    { label: 'Leaderboard', to: '/leaderboard', icon: LeaderboardRoundedIcon },
     { label: 'Certificates', to: '/certificates', icon: WorkspacePremiumRoundedIcon },
   ],
   TRAINER: [

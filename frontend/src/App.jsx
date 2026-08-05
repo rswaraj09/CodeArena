@@ -38,7 +38,7 @@ function App() {
         </Route>
 
         {/* Shared Authenticated Routes */}
-        <Route element={<ProtectedRoute allowedRoles={['STUDENT', 'TRAINER', 'ADMIN']} />}>
+        <Route element={<ProtectedRoute allowedRoles={['TRAINER', 'ADMIN']} />}>
           <Route element={<DashboardLayout />}>
             <Route path="/leaderboard" element={<LeaderboardPage />} />
           </Route>
