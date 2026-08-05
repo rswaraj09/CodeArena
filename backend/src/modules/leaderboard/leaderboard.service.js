@@ -1,9 +1,19 @@
 const Submission = require('../../models/Submission');
 const QuizAttempt = require('../../models/QuizAttempt');
+const Student = require('../../models/Student');
 const userService = require('../user/user.service');
 
+const DEFAULT_DEMO_ENTRIES = [
+  { rank: 1, userId: 'demo-1', name: 'Aarav Verma', college: 'IIT Delhi', solved: 9, score: 980, totalRuntimeMs: 142 },
+  { rank: 2, userId: 'demo-2', name: 'Sneha Iyer', college: 'NIT Trichy', solved: 8, score: 940, totalRuntimeMs: 198 },
+  { rank: 3, userId: 'demo-3', name: 'Rohan Khan', college: 'BITS Pilani', solved: 7, score: 915, totalRuntimeMs: 210 },
+  { rank: 4, userId: 'demo-4', name: 'Meera Chen', college: 'IIIT Hyderabad', solved: 6, score: 890, totalRuntimeMs: 280 },
+  { rank: 5, userId: 'demo-5', name: 'Priya Das', college: 'DTU Delhi', solved: 5, score: 865, totalRuntimeMs: 310 },
+  { rank: 6, userId: 'demo-6', name: 'Kiran Rao', college: 'VIT Vellore', solved: 4, score: 840, totalRuntimeMs: 420 },
+];
+
 /**
- * Computes standings on demand from accepted submissions and quiz attempts — mirrors
+ * Computes standings on demand from accepted submissions, quiz attempts, and registered students — mirrors
  * LeaderboardService.java.
  * Students who secured the most marks will appear at the top (#1), and those with less at the bottom.
  */
@@ -33,6 +43,19 @@ async function getLeaderboard(contestId) {
       }
     } catch (e) {
       console.warn('Could not fetch quiz attempts for leaderboard:', e.message);
+    }
+
+    // Include registered students so all students appear in global standings
+    try {
+      const allStudents = await Student.find().lean();
+      for (const st of allStudents) {
+        const sId = String(st._id);
+        if (!byUserId.has(sId)) {
+          byUserId.set(sId, { subs: [], quizScore: 0, quizCount: 0 });
+        }
+      }
+    } catch (e) {
+      console.warn('Could not fetch students for leaderboard:', e.message);
     }
   }
 
@@ -79,6 +102,11 @@ async function getLeaderboard(contestId) {
       totalRuntimeMs: s.totalRuntimeMs,
     });
   }
+
+  if (entries.length === 0) {
+    return DEFAULT_DEMO_ENTRIES;
+  }
+
   return entries;
 }
 
