@@ -1,10 +1,11 @@
 const Submission = require('../../models/Submission');
+const QuizAttempt = require('../../models/QuizAttempt');
 const userService = require('../user/user.service');
 
 /**
- * Computes standings on demand from accepted submissions rather than
- * maintaining a separately-updated leaderboard table — mirrors
+ * Computes standings on demand from accepted submissions and quiz attempts — mirrors
  * LeaderboardService.java.
+ * Students who secured the most marks will appear at the top (#1), and those with less at the bottom.
  */
 async function getLeaderboard(contestId) {
   const filter = contestId ? { contestId, verdict: 'ACCEPTED' } : { verdict: 'ACCEPTED' };
@@ -12,18 +13,51 @@ async function getLeaderboard(contestId) {
 
   const byUserId = new Map();
   for (const s of accepted) {
-    if (!byUserId.has(s.userId)) byUserId.set(s.userId, []);
-    byUserId.get(s.userId).push(s);
+    if (!byUserId.has(s.userId)) {
+      byUserId.set(s.userId, { subs: [], quizScore: 0, quizCount: 0 });
+    }
+    byUserId.get(s.userId).subs.push(s);
   }
 
-  const standings = [...byUserId.entries()].map(([userId, subs]) => {
+  // Include completed quiz scores for global leaderboard (when contestId is null)
+  if (!contestId) {
+    try {
+      const quizAttempts = await QuizAttempt.find({ completed: true });
+      for (const q of quizAttempts) {
+        if (!byUserId.has(q.userId)) {
+          byUserId.set(q.userId, { subs: [], quizScore: 0, quizCount: 0 });
+        }
+        const entry = byUserId.get(q.userId);
+        entry.quizScore += q.score || 0;
+        entry.quizCount += 1;
+      }
+    } catch (e) {
+      console.warn('Could not fetch quiz attempts for leaderboard:', e.message);
+    }
+  }
+
+  const standings = [...byUserId.entries()].map(([userId, data]) => {
+    const { subs, quizScore, quizCount } = data;
     const solvedProblemIds = new Set(subs.map((s) => String(s.problemId)));
-    const solved = solvedProblemIds.size;
+    const solvedCoding = solvedProblemIds.size;
+    const codingScore = solvedCoding * 100;
     const totalRuntimeMs = subs.reduce((sum, s) => sum + (s.runtimeMs || 0), 0);
-    return { userId, solved, score: solved * 100, totalRuntimeMs };
+    const totalScore = codingScore + quizScore;
+    const totalSolved = solvedCoding + quizCount;
+
+    return {
+      userId,
+      solved: totalSolved,
+      score: totalScore,
+      totalRuntimeMs,
+    };
   });
 
-  standings.sort((a, b) => (b.score - a.score) || (a.totalRuntimeMs - b.totalRuntimeMs));
+  // Sort strictly by total score/marks descending (highest marks top, lowest bottom).
+  // Tie-breakers: most solved items descending, lowest runtime ascending.
+  standings.sort(
+    (a, b) => (b.score - a.score) || (b.solved - a.solved) || (a.totalRuntimeMs - b.totalRuntimeMs)
+  );
 
   const entries = [];
   for (let i = 0; i < standings.length; i++) {
@@ -36,7 +70,7 @@ async function getLeaderboard(contestId) {
       continue;
     }
     entries.push({
-      rank: i + 1,
+      rank: entries.length + 1,
       userId: user.id,
       name: user.name,
       college: user.college,
@@ -49,3 +83,4 @@ async function getLeaderboard(contestId) {
 }
 
 module.exports = { getLeaderboard };
+
