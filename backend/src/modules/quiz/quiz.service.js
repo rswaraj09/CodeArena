@@ -152,6 +152,15 @@ async function submit(quizId, request, student) {
     submittedAt: new Date(),
   });
 
+  try {
+    const leaderboardService = require('../leaderboard/leaderboard.service');
+    const { broadcastLeaderboard } = require('../../websocket/socket');
+    const entries = await leaderboardService.getLeaderboard(null);
+    broadcastLeaderboard(null, entries);
+  } catch (_e) {
+    // Ignore socket error if websocket is disabled
+  }
+
   const percentage = quiz.totalMarks > 0 ? Math.round((totalScore / quiz.totalMarks) * 1000) / 10 : 0;
 
   return {
