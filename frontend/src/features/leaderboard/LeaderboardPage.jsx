@@ -13,7 +13,14 @@ const LeaderboardPage = () => {
   useEffect(() => {
     leaderboardService
       .getLeaderboard()
-      .then((res) => setEntries(res.data || []))
+      .then((res) => {
+        const raw = res.data || [];
+        const sorted = [...raw].sort(
+          (a, b) => (b.score - a.score) || (b.solved - a.solved) || ((a.totalRuntimeMs || 0) - (b.totalRuntimeMs || 0))
+        );
+        const ranked = sorted.map((item, idx) => ({ ...item, rank: idx + 1 }));
+        setEntries(ranked);
+      })
       .catch((err) => setError(err.response?.data?.message || 'Failed to load leaderboard.'))
       .finally(() => setLoading(false));
   }, []);
@@ -27,7 +34,9 @@ const LeaderboardPage = () => {
           <Typography variant="caption" color="text.secondary">Global standings</Typography>
         </Stack>
       </Stack>
-      <Typography sx={{ color: 'text.secondary', mb: 3 }}>Ranked by problems solved, total score, and execution time.</Typography>
+      <Typography sx={{ color: 'text.secondary', mb: 3 }}>
+        Ranked by total marks secured (highest at top, lowest at bottom), items solved, and execution time.
+      </Typography>
 
       {error ? (
         <Typography color="error">{error}</Typography>
