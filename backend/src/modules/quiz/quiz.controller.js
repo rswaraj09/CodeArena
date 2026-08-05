@@ -26,4 +26,9 @@ async function getResult(req, res) {
   res.json(ApiResponse.ok(data));
 }
 
-module.exports = { list, getDetail, create, submit, getResult };
+async function remove(req, res) {
+  await quizService.remove(req.params.id, req.user);
+  res.json(ApiResponse.message('Test deleted successfully.'));
+}
+
+module.exports = { list, getDetail, create, submit, getResult, remove };

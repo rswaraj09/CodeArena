@@ -11,5 +11,6 @@ router.get('/:id', controller.getDetail);
 router.post('/', requireAuth, requireRole('TRAINER', 'ADMIN'), validateBody(v.createQuizSchema), controller.create);
 router.post('/:id/submit', requireAuth, validateBody(v.submitQuizSchema), controller.submit);
 router.get('/:id/result', requireAuth, controller.getResult);
+router.delete('/:id', requireAuth, requireRole('TRAINER', 'ADMIN'), controller.remove);
 
 module.exports = router;

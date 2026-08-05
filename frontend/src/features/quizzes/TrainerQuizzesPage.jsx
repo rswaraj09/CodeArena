@@ -39,6 +39,8 @@ const TrainerQuizzesPage = () => {
   const [error, setError] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Form State
   const [title, setTitle] = useState('');
@@ -60,6 +62,18 @@ const TrainerQuizzesPage = () => {
       .then((res) => setQuizzes(res.data || []))
       .catch((err) => setError(err.response?.data?.message || 'Failed to load tests.'))
       .finally(() => setLoading(false));
+  };
+
+  const handleDeleteQuiz = (id) => {
+    setDeleting(true);
+    quizService
+      .delete(id)
+      .then(() => {
+        setDeleteTargetId(null);
+        loadQuizzes();
+      })
+      .catch((err) => alert(err.response?.data?.message || 'Failed to delete test.'))
+      .finally(() => setDeleting(false));
   };
 
   useEffect(() => {
@@ -182,11 +196,22 @@ const TrainerQuizzesPage = () => {
                         {q.description || 'No description provided.'}
                       </Typography>
                     </Box>
-                    <Chip
-                      size="small"
-                      label={style.label}
-                      sx={{ color: style.color, bgcolor: `${style.color}1F`, fontWeight: 600 }}
-                    />
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Chip
+                        size="small"
+                        label={style.label}
+                        sx={{ color: style.color, bgcolor: `${style.color}1F`, fontWeight: 600 }}
+                      />
+                      <IconButton
+                        size="small"
+                        color="error"
+                        title="Delete Test"
+                        onClick={() => setDeleteTargetId(q.id)}
+                        sx={{ ml: 0.5 }}
+                      >
+                        <DeleteOutlineRoundedIcon fontSize="small" />
+                      </IconButton>
+                    </Stack>
                   </Stack>
 
                   <Stack direction="row" spacing={2} sx={{ mt: 2, color: 'text.secondary' }}>
@@ -368,6 +393,29 @@ const TrainerQuizzesPage = () => {
             </Button>
           </DialogActions>
         </form>
+      </Dialog>
+
+      {/* Delete Test Confirmation Modal */}
+      <Dialog open={Boolean(deleteTargetId)} onClose={() => setDeleteTargetId(null)}>
+        <DialogTitle>Delete Test</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            Are you sure you want to delete this test? All questions, student attempts, and results for this test will be permanently deleted.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5 }}>
+          <Button onClick={() => setDeleteTargetId(null)} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => handleDeleteQuiz(deleteTargetId)}
+            disabled={deleting}
+          >
+            {deleting ? 'Deleting...' : 'Delete Test'}
+          </Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );

@@ -219,4 +219,11 @@ async function getById(id) {
   return quiz;
 }
 
-module.exports = { create, list, getDetail, submit, getResult, getById };
+async function remove(quizId, user) {
+  await getById(quizId);
+  await Quiz.deleteOne({ _id: quizId });
+  await QuizAttempt.deleteMany({ quizId });
+  return true;
+}
+
+module.exports = { create, list, getDetail, submit, getResult, getById, remove };
