@@ -141,7 +141,7 @@ const TrainerQuizzesPage = () => {
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
         <Box>
           <Typography variant="h4" sx={{ fontSize: '1.6rem', mb: 0.5 }}>
-            Quizzes & Tests
+            Tests & Assessments
           </Typography>
           <Typography sx={{ color: 'text.secondary' }}>
             Create auto-graded tests with MCQ answer keys and duration settings.

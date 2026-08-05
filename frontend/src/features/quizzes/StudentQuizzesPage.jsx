@@ -23,14 +23,14 @@ const StudentQuizzesPage = () => {
     quizService
       .list()
       .then((res) => setQuizzes(res.data || []))
-      .catch((err) => setError(err.response?.data?.message || 'Failed to load quizzes.'))
+      .catch((err) => setError(err.response?.data?.message || 'Failed to load tests.'))
       .finally(() => setLoading(false));
   }, []);
 
   return (
     <Box>
       <Typography variant="h4" sx={{ fontSize: '1.6rem', mb: 0.5 }}>
-        Quizzes & Tests
+        Tests & Assessments
       </Typography>
       <Typography sx={{ color: 'text.secondary', mb: 3 }}>
         Attempt scheduled tests within active window with automated scoring.

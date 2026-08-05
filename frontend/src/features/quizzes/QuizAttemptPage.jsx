@@ -124,7 +124,7 @@ const QuizAttemptPage = () => {
     return (
       <Box sx={{ maxWidth: 800, mx: 'auto' }}>
         <Button startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate('/quizzes')} sx={{ mb: 2 }}>
-          Back to Quizzes
+          Back to Tests
         </Button>
         <Typography color="error">{error}</Typography>
       </Box>
@@ -136,7 +136,7 @@ const QuizAttemptPage = () => {
     return (
       <Box sx={{ maxWidth: 850, mx: 'auto' }}>
         <Button startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate('/quizzes')} sx={{ mb: 3 }}>
-          Back to Quizzes
+          Back to Tests
         </Button>
 
         <Paper elevation={0} sx={{ p: 4, borderRadius: 3, textAlign: 'center', mb: 3 }}>
