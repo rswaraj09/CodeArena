@@ -37,6 +37,13 @@ function App() {
           <Route path="/forgot-password" element={<ComingSoon title="Forgot password" description="Password reset via OTP verification." />} />
         </Route>
 
+        {/* Shared Authenticated Routes */}
+        <Route element={<ProtectedRoute allowedRoles={['STUDENT', 'TRAINER', 'ADMIN']} />}>
+          <Route element={<DashboardLayout />}>
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
+          </Route>
+        </Route>
+
         {/* Student */}
         <Route element={<ProtectedRoute allowedRoles={['STUDENT']} />}>
           <Route element={<DashboardLayout />}>
@@ -49,7 +56,6 @@ function App() {
             <Route path="/assignments" element={<ComingSoon title="Assignments" description="Deadlines, submissions and feedback in one place." />} />
             <Route path="/quizzes" element={<StudentQuizzesPage />} />
             <Route path="/quizzes/:id/attempt" element={<QuizAttemptPage />} />
-            <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/certificates" element={<ComingSoon title="Certificates" description="Download your QR-verified certificates." />} />
           </Route>
         </Route>
