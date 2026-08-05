@@ -15,7 +15,6 @@ export const NAV_BY_ROLE = {
   STUDENT: [
     { label: 'Dashboard', to: '/student', icon: DashboardRoundedIcon },
     { label: 'Code', to: '/problems', icon: CodeRoundedIcon },
-    { label: 'Contests', to: '/contests', icon: EmojiEventsRoundedIcon },
     { label: 'Assignments', to: '/assignments', icon: AssignmentRoundedIcon },
     { label: 'Quizzes', to: '/quizzes', icon: QuizRoundedIcon },
     { label: 'Leaderboard', to: '/leaderboard', icon: LeaderboardRoundedIcon },

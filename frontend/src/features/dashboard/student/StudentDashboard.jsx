@@ -114,7 +114,7 @@ const StudentDashboard = () => {
           <StatCard label="Streak" value={`${data.streakDays} days`} sublabel={`Personal best: ${data.personalBestStreak}`} icon={LocalFireDepartmentRoundedIcon} accent="#FB6467" />
         </Grid>
         <Grid item xs={6} md={3}>
-          <StatCard label="Upcoming" value={data.pendingCount} sublabel="Contests & events" icon={AssignmentLateRoundedIcon} accent="secondary.main" />
+          <StatCard label="Upcoming" value={data.pendingCount} sublabel="Quizzes & tests" icon={AssignmentLateRoundedIcon} accent="secondary.main" />
         </Grid>
       </Grid>
 
@@ -145,7 +145,7 @@ const StudentDashboard = () => {
               </Stack>
             ) : (
               <Typography variant="body2" color="text.secondary" sx={{ mt: 6, textAlign: 'center' }}>
-                No upcoming contests right now.
+                No upcoming quizzes right now.
               </Typography>
             )}
           </Paper>

@@ -52,7 +52,6 @@ function App() {
             <Route path="/compiler" element={<OnlineCompilerPage />} />
             <Route path="/problems/practice" element={<ProblemsListPage />} />
             <Route path="/problems/:slug" element={<ProblemWorkspacePage />} />
-            <Route path="/contests" element={<ContestsListPage />} />
             <Route path="/assignments" element={<ComingSoon title="Assignments" description="Deadlines, submissions and feedback in one place." />} />
             <Route path="/quizzes" element={<StudentQuizzesPage />} />
             <Route path="/quizzes/:id/attempt" element={<QuizAttemptPage />} />
