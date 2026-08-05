@@ -5,15 +5,6 @@ import leaderboardService from '@/services/leaderboardService';
 
 const RANK_COLOR = { 1: '#FFB020', 2: '#C7CEDA', 3: '#B87333' };
 
-const DEMO_ENTRIES = [
-  { rank: 1, userId: 'demo-1', name: 'Aarav Verma', college: 'IIT Delhi', solved: 9, score: 980, totalRuntimeMs: 142 },
-  { rank: 2, userId: 'demo-2', name: 'Sneha Iyer', college: 'NIT Trichy', solved: 8, score: 940, totalRuntimeMs: 198 },
-  { rank: 3, userId: 'demo-3', name: 'Rohan Khan', college: 'BITS Pilani', solved: 7, score: 915, totalRuntimeMs: 210 },
-  { rank: 4, userId: 'demo-4', name: 'Meera Chen', college: 'IIIT Hyderabad', solved: 6, score: 890, totalRuntimeMs: 280 },
-  { rank: 5, userId: 'demo-5', name: 'Priya Das', college: 'DTU Delhi', solved: 5, score: 865, totalRuntimeMs: 310 },
-  { rank: 6, userId: 'demo-6', name: 'Kiran Rao', college: 'VIT Vellore', solved: 4, score: 840, totalRuntimeMs: 420 },
-];
-
 const LeaderboardPage = () => {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,20 +14,14 @@ const LeaderboardPage = () => {
     leaderboardService
       .getLeaderboard()
       .then((res) => {
-        let raw = res.data || [];
-        if (!Array.isArray(raw) || raw.length === 0) {
-          raw = DEMO_ENTRIES;
-        }
+        const raw = res.data || [];
         const sorted = [...raw].sort(
           (a, b) => (b.score - a.score) || (b.solved - a.solved) || ((a.totalRuntimeMs || 0) - (b.totalRuntimeMs || 0))
         );
         const ranked = sorted.map((item, idx) => ({ ...item, rank: idx + 1 }));
         setEntries(ranked);
       })
-      .catch(() => {
-        // Fallback to DEMO_ENTRIES on API load error as well
-        setEntries(DEMO_ENTRIES);
-      })
+      .catch((err) => setError(err.response?.data?.message || 'Failed to load leaderboard.'))
       .finally(() => setLoading(false));
   }, []);
 
