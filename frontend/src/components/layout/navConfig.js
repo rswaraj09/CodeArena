@@ -29,6 +29,7 @@ export const NAV_BY_ROLE = {
     { label: 'Assignments', to: '/trainer/assignments', icon: AssignmentRoundedIcon },
     { label: 'Code Bank', to: '/trainer/questions', icon: CodeRoundedIcon },
     { label: 'Students', to: '/trainer/students', icon: GroupsRoundedIcon },
+    { label: 'Leaderboard', to: '/leaderboard', icon: LeaderboardRoundedIcon },
     { label: 'Analytics', to: '/trainer/analytics', icon: BarChartRoundedIcon },
   ],
   ADMIN: [
@@ -37,6 +38,7 @@ export const NAV_BY_ROLE = {
     { label: 'Trainers', to: '/admin/trainers', icon: AdminPanelSettingsRoundedIcon },
     { label: 'Contests', to: '/admin/contests', icon: EmojiEventsRoundedIcon },
     { label: 'Code Bank', to: '/admin/questions', icon: CodeRoundedIcon },
+    { label: 'Leaderboard', to: '/leaderboard', icon: LeaderboardRoundedIcon },
     { label: 'Analytics', to: '/admin/analytics', icon: BarChartRoundedIcon },
     { label: 'Settings', to: '/admin/settings', icon: SettingsRoundedIcon },
   ],
