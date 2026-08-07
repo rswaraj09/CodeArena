@@ -13,7 +13,7 @@ const env = {
 
   jwt: {
     secret: process.env.JWT_SECRET || 'change-this-dev-secret-change-this-dev-secret-please',
-    accessTokenExpiryMs: parseInt(process.env.JWT_ACCESS_EXPIRY_MS || '900000', 10),
+    accessTokenExpiryMs: parseInt(process.env.JWT_ACCESS_EXPIRY_MS || '3600000', 10),
     refreshTokenExpiryMs: parseInt(process.env.JWT_REFRESH_EXPIRY_MS || '604800000', 10),
   },
 

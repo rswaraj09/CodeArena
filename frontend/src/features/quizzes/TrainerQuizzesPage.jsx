@@ -132,7 +132,10 @@ const TrainerQuizzesPage = () => {
         resetForm();
         loadQuizzes();
       })
-      .catch((err) => alert(err.response?.data?.message || 'Failed to create test.'))
+      .catch((err) => {
+        if (err.response?.status === 401) return;
+        alert(err.response?.data?.message || 'Failed to create test.');
+      })
       .finally(() => setSubmitting(false));
   };
 
